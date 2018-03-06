@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+
 import json
+import itertools
 import os
 import re
 import sys
 import subprocess
 
 from composite import create_composite_sprite
+
+spinner = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
 
 
 def data_path(data_type, oid=None, ext='txt'):
@@ -58,19 +63,23 @@ KNOWN_SPRITE_PROPS = {
 
 
 def update(out):
-    sys.stderr.write("Parsing object files...\n")
+    sys.stderr.write("Parsing object files ⠏")
 
     # Objects
     objects = {}
     objects_path = data_path('objects')
     for fn in os.listdir(data_path('objects')):
+        sys.stderr.write('\b' + spinner.next())
+
         if fn != 'nextObjectNumber.txt':
             oid, obj = parse_object_file(os.path.join(objects_path, fn))
             objects[oid] = obj
 
-    sys.stderr.write("Generating sprites...\n")
+    sys.stderr.write("\b\b\nGenerating sprites ⠏")
 
     for obj in objects.itervalues():
+        sys.stderr.write('\b' + spinner.next())
+
         # Category
         if obj['name'].startswith('@ '):
             obj['name'] = obj['name'][2:]
@@ -92,6 +101,7 @@ def update(out):
 
     interactions = {}
 
+    sys.stderr.write("\b\b\nDone!\n")
     print(json.dumps({'objects': objects}))
 
 
@@ -136,9 +146,6 @@ def parse_object_file(fn):
             data_path('sprites', sp['id']))
         sp['name'] = name
         sp['offset'] = (offset_x, offset_y)
-
-        # This makes following the tree later easier.
-        sp['index'] = i
 
     return oid, obj
 
