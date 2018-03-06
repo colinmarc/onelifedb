@@ -7,6 +7,13 @@ import subprocess
 from composite import create_composite_sprite
 
 
+def data_path(data_type, oid=None, ext='txt'):
+    if oid:
+        return os.path.join('OneLifeData7', data_type, '{}.{}'.format(str(oid), ext))
+    else:
+        return os.path.join('OneLifeData7', data_type)
+
+
 def parse_bool(s):
     return s == '1'
 
@@ -35,51 +42,53 @@ KNOWN_OBJECT_PROPS = {
     'numUses': int,
     'numSlots': int,
     'permanent': parse_bool,
+    'person': parse_bool,
+    'pixHeight': int,
     'rValue': float,
     'spriteID': int
 }
 
 KNOWN_SPRITE_PROPS = {
+    'ageRange': parse_coords,
+    'hFlip': parse_bool,
+    'parent': int,
     'pos': parse_coords,
-    'rot': float,
-    'hFlip': parse_bool
+    'rot': float
 }
 
 
 def update(out):
-    base_path = 'OneLifeData7'
-    objects_path = os.path.join(base_path, 'objects')
-    sprites_path = os.path.join(base_path, 'sprites')
-    categories_path = os.path.join(base_path, 'categories')
-    transitions_path = os.path.join(base_path, 'categories')
-
-    sys.stderr.write('Parsing object files...')
+    sys.stderr.write("Parsing object files...\n")
 
     # Objects
     objects = {}
-    for fn in os.listdir(objects_path):
+    objects_path = data_path('objects')
+    for fn in os.listdir(data_path('objects')):
         if fn != 'nextObjectNumber.txt':
             oid, obj = parse_object_file(os.path.join(objects_path, fn))
             objects[oid] = obj
 
-    sprites = {}
+    sys.stderr.write("Generating sprites...\n")
+
     for obj in objects.itervalues():
-        # Sprite
-        for sp in obj['sprites']:
-            sp['fn'] = tga_fn = os.path.join(
-                sprites_path, '{}.tga'.format(sp['id']))
-
-        out_fn = os.path.join('sprites', '{}.png'.format(obj['id']))
-        create_composite_sprite(obj['sprites'], out_fn)
-        obj['sprite'] = out_fn
-        # del obj['sprites']
-
         # Category
         if obj['name'].startswith('@ '):
-            fn = os.path.join(categories_path, '{}.txt'.format(obj['id']))
             obj['name'] = obj['name'][2:]
             obj['category'] = True
-            obj['category_members'] = parse_category_file(fn)
+            obj['category_members'] = parse_category_file(
+                data_path('categories', obj['id']))
+
+            # No need for a sprite
+            next
+
+        if obj['person']:
+            next
+
+        # Create a composite Sprite
+        out_fn = os.path.join('sprites', '{}.png'.format(obj['id']))
+        create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
+        obj['sprite'] = out_fn
+        del obj['sprites']
 
     interactions = {}
 
@@ -90,7 +99,6 @@ def parse_object_file(fn):
     with open(fn) as f:
         raw = f.read()
 
-    # props = re.split(r"[\s#]", raw)
     lines = raw.splitlines()
     oid = int(lines.pop(0).split('=')[1])
     name = lines.pop(0)
@@ -104,7 +112,12 @@ def parse_object_file(fn):
             if current_sprite is not None:
                 obj['sprites'].append(current_sprite)
 
-            current_sprite = {'id': int(value)}
+            sid = int(value)
+            current_sprite = {
+                'id': sid,
+                'sprite': data_path('sprites', sid, 'tga')
+            }
+            next
 
         sprite_converter = KNOWN_SPRITE_PROPS.get(name)
         if sprite_converter:
@@ -117,12 +130,28 @@ def parse_object_file(fn):
             obj[name] = converter(cleaned_value)
 
     obj['sprites'].append(current_sprite)
+    for i, sp in enumerate(obj['sprites']):
+        # Load the offset from the info file.
+        name, offset_x, offset_y = parse_sprite_info_file(
+            data_path('sprites', sp['id']))
+        sp['name'] = name
+        sp['offset'] = (offset_x, offset_y)
+
+        # This makes following the tree later easier.
+        sp['index'] = i
+
     return oid, obj
 
 
 def parse_category_file(fn):
     with open(fn) as f:
         return map(int, f.read().splitlines()[2:])
+
+
+def parse_sprite_info_file(fn):
+    with open(fn) as f:
+        raw = f.read().split()
+        return raw[0], float(raw[2]), float(raw[3])
 
 
 if __name__ == '__main__':
