@@ -46,12 +46,24 @@ KNOWN_SPRITE_PROPS = {
 }
 
 
+TRANSITION_PROPS = [
+    ('newActor', int),
+    ('newTarget', int),
+    ('autoDecaySecs', int),
+    ('actorMinUseFraction', float),
+    ('targetMinUseFraction', float),
+    ('reverseUseActor', int),
+    ('reverseUseTargetFlag', int),
+    ('move', int),
+    ('desiredMoveDist', int)
+]
+
 def update(out):
     base_path = 'OneLifeData7'
     objects_path = os.path.join(base_path, 'objects')
     sprites_path = os.path.join(base_path, 'sprites')
     categories_path = os.path.join(base_path, 'categories')
-    transitions_path = os.path.join(base_path, 'categories')
+    transitions_path = os.path.join(base_path, 'transitions')
 
     sys.stderr.write('Parsing object files...')
 
@@ -82,8 +94,16 @@ def update(out):
             obj['category_members'] = parse_category_file(fn)
 
     interactions = {}
+    
+    trans_files = os.listdir(transitions_path)
+    transitions = [parse_transition_file(os.path.join(transitions_path,fn))
+                   for fn in trans_files
+                   if re.match("-?[\d]*_-?[\d]*[_A-Z]*.txt", fn)]
 
-    print(json.dumps({'objects': objects}))
+    print(json.dumps({
+        'objects': objects,
+        'transitions': transitions
+    }))
 
 
 def parse_object_file(fn):
@@ -124,6 +144,21 @@ def parse_category_file(fn):
     with open(fn) as f:
         return map(int, f.read().splitlines()[2:])
 
+def parse_transition_file(fn):
+    with  open(fn) as f:
+        line = f.read().splitlines()[0]
+        
+    fn_data = os.path.basename(fn)[:-4].split("_")
+    transition = {
+        "actor": int(fn_data[0]),
+        "target": int(fn_data[1])
+    }
+
+    props_raw = line.split(" ")
+    for idx, val in enumerate(props_raw):
+        name, converter = TRANSITION_PROPS[idx]
+        transition[name] = converter(val)
+    return transition
 
 if __name__ == '__main__':
     with open('ohol_new.json', 'w') as out:
