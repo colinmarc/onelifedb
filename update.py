@@ -4,9 +4,15 @@ import re
 import sys
 import subprocess
 
+from composite import create_composite_sprite
+
 
 def parse_bool(s):
     return s == '1'
+
+
+def parse_coords(s):
+    return map(float, s.split(',', 2))
 
 
 CLOTHING_POSITIONS = {
@@ -33,6 +39,12 @@ KNOWN_OBJECT_PROPS = {
     'spriteID': int
 }
 
+KNOWN_SPRITE_PROPS = {
+    'pos': parse_coords,
+    'rot': float,
+    'hFlip': parse_bool
+}
+
 
 def update(out):
     base_path = 'OneLifeData7'
@@ -53,14 +65,14 @@ def update(out):
     sprites = {}
     for obj in objects.itervalues():
         # Sprite
-        sid = obj['spriteID']
-        if sid not in sprites:
-            png_fn = os.path.join('sprites', '{}.png'.format(sid))
-            tga_fn = os.path.join(sprites_path, '{}.tga'.format(sid))
-            subprocess.check_call(['convert', tga_fn, png_fn])
-            sprites[sid] = png_fn
+        for sp in obj['sprites']:
+            sp['fn'] = tga_fn = os.path.join(
+                sprites_path, '{}.tga'.format(sp['id']))
 
-        obj['sprite'] = sprites[sid]
+        out_fn = os.path.join('sprites', '{}.png'.format(obj['id']))
+        create_composite_sprite(obj['sprites'], out_fn)
+        obj['sprite'] = out_fn
+        # del obj['sprites']
 
         # Category
         if obj['name'].startswith('@ '):
@@ -71,7 +83,7 @@ def update(out):
 
     interactions = {}
 
-    print json.dumps({'objects': objects})
+    print(json.dumps({'objects': objects}))
 
 
 def parse_object_file(fn):
@@ -83,14 +95,28 @@ def parse_object_file(fn):
     oid = int(lines.pop(0).split('=')[1])
     name = lines.pop(0)
 
-    obj = {'id': oid, 'name': name}
+    obj = {'id': oid, 'name': name, 'sprites': []}
+    current_sprite = None
     for line in lines:
         name, value = line.split('=', 1)
+
+        if name == 'spriteID':
+            if current_sprite is not None:
+                obj['sprites'].append(current_sprite)
+
+            current_sprite = {'id': int(value)}
+
+        sprite_converter = KNOWN_SPRITE_PROPS.get(name)
+        if sprite_converter:
+            current_sprite[name] = sprite_converter(value)
+            next
+
         converter = KNOWN_OBJECT_PROPS.get(name)
-        if converter and name not in obj:
-            cleaned_value = re.split(r"[#,]", value, 2)[0]
+        if converter:
+            cleaned_value = re.split(r"[#,]", value, maxsplit=2)[0]
             obj[name] = converter(cleaned_value)
 
+    obj['sprites'].append(current_sprite)
     return oid, obj
 
 
