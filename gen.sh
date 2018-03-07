@@ -14,10 +14,13 @@ then
   exit
 fi
 
+TMP=$(mktemp -d)
 DIST=${1:-dist}
+
+mkdir -p "$TMP/sprites"
+pipenv run python gen.py "$TMP"
 rm -rf "$DIST"
-mkdir -p "$DIST/sprites"
-pipenv run python gen.py "$DIST"
+mv -T "$TMP" "$DIST"
 
 # Successfully created a distribution for this SHA.
 echo "$NEW_SHA" > "$SHA_FILE"
