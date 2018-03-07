@@ -1,4 +1,5 @@
 set -e
+cd $(dirname $0)
 
 SHA_FILE="ONELIFEDATA7_SHA"
 OLD_SHA=$(cat $SHA_FILE || true)
