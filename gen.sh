@@ -14,9 +14,10 @@ then
   exit
 fi
 
-echo "$NEW_SHA" > "$SHA_FILE"
-
 DIST=${1:-dist}
-rm -r "$DIST"
+rm -rf "$DIST"
 mkdir -p "$DIST/sprites"
 pipenv run python gen.py "$DIST"
+
+# Successfully created a distribution for this SHA.
+echo "$NEW_SHA" > "$SHA_FILE"
