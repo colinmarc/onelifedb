@@ -4,7 +4,7 @@ SHA_FILE="ONELIFEDATA7_SHA"
 OLD_SHA=$(cat $SHA_FILE || true)
 
 echo "Updating git..."
-(>/dev/null 2>&1 git clone -q --depth 1 https://github.com/jasonrohrer/OneLifeData7 || \
+(>/dev/null 2>&1 git clone -q https://github.com/jasonrohrer/OneLifeData7 || \
   git -C OneLifeData7 pull -q)
 NEW_SHA=$(git -C OneLifeData7 rev-parse HEAD)
 
