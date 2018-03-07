@@ -19,8 +19,10 @@ DIST=${1:-dist}
 
 mkdir -p "$TMP/sprites"
 pipenv run python gen.py "$TMP"
+
+echo "Moving $TMP to $DIST..."
 rm -rf "$DIST"
-mv -T "$TMP" "$DIST"
+mv "$TMP" "$DIST"
 
 # Successfully created a distribution for this SHA.
 echo "$NEW_SHA" > "$SHA_FILE"
