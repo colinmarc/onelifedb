@@ -10,7 +10,6 @@ import subprocess
 from composite import create_composite_sprite
 from version import load_object_versions
 
-SPINNER = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
 REPO = 'OneLifeData7'
 
 
@@ -76,14 +75,18 @@ TRANSITION_PROPS = [
 ]
 
 
-def update(out):
-    sys.stderr.write("Loading transitions ⠏")
+def generate_json(dist_path):
+    print("Loading version info from git...")
+
+    # Collect the version that each object was added.
+    object_versions = load_object_versions(REPO)
+
+    print("Parsing transitions...")
 
     # Transitions
     transitions = []
     transitions_path = data_path('transitions')
     for fn in os.listdir(transitions_path):
-        sys.stderr.write('\b' + SPINNER.next())
         if re.match("-?[\d]*_-?[\d]*[_A-Z]*.txt", fn):
             transitions.append(load_transition(
                 os.path.join(transitions_path, fn)))
@@ -94,38 +97,30 @@ def update(out):
                                   for field in ('target', 'actor',
                                                 'newActor', 'newTarget'))
 
-    sys.stderr.write("\b\b\nLoading version info\n")
-
-    # Collect the version that each object was added.
-    object_versions = load_object_versions(REPO)
-
-    sys.stderr.write("Parsing object files ⠏")
+    print("Parsing object files...")
 
     # Objects
     objects = {}
     objects_path = data_path('objects')
     for fn in os.listdir(objects_path):
-        sys.stderr.write('\b' + SPINNER.next())
-
         if fn != 'nextObjectNumber.txt' and int(fn[:-4]) in natural_objects:
             oid, obj = load_object(os.path.join(objects_path, fn))
             obj['version'] = object_versions[oid]
             objects[oid] = obj
 
-    sys.stderr.write("\b\b\nGenerating sprites ⠏")
+    print("Generating sprites...")
 
     # Sprites
     for obj in objects.itervalues():
-        sys.stderr.write('\b' + SPINNER.next())
-
-        # Create a composite sprite.
-        out_fn = os.path.join('sprites', '{}.png'.format(obj['id']))
+        out_fn = os.path.join(dist_path, 'sprites', '{}.png'.format(obj['id']))
         create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
         obj['sprite'] = out_fn
         del obj['sprites']
 
-    json.dump({'objects': objects, 'transitions': transitions}, out)
-    sys.stderr.write("\b\b\nDone!\n")
+    with open(os.path.join(dist_path, 'ohol.json'), 'w') as out:
+        json.dump({'objects': objects, 'transitions': transitions}, out)
+
+    print("Done!")
 
 
 def load_object(fn):
@@ -207,7 +202,4 @@ def load_transition(fn):
 
 
 if __name__ == '__main__':
-    with open('ohol_new.json', 'w') as out:
-        update(out)
-
-    os.rename('ohol_new.json', 'ohol.json')
+    generate_json(sys.argv[1])
