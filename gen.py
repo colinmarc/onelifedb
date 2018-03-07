@@ -145,12 +145,12 @@ def load_object(fn):
                 'id': sid,
                 'sprite': data_path('sprites', sid, 'tga')
             }
-            next
+            continue
 
         sprite_converter = SPRITE_PROPS.get(name)
         if sprite_converter:
             current_sprite[name] = sprite_converter(value)
-            next
+            continue
 
         converter = OBJECT_PROPS.get(name)
         if converter:

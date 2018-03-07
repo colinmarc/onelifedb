@@ -28,10 +28,11 @@ def load_object_versions(path):
 
     object_to_commit = {}
     for commit in repo.iter_commits():
+        parent = None
         try:
             parent = commit.iter_parents().next()
         except StopIteration:
-            next
+            continue
 
         new_files = (diff.b_path for diff in parent.diff(commit)
                      if diff.new_file or diff.rename_to)
