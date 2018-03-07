@@ -21,6 +21,7 @@ mkdir -p "$TMP/sprites"
 pipenv run python gen.py "$TMP"
 
 echo "Moving $TMP to $DIST..."
+chmod 755 "$TMP"
 rm -rf "$DIST"
 mv "$TMP" "$DIST"
 
