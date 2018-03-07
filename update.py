@@ -8,15 +8,17 @@ import sys
 import subprocess
 
 from composite import create_composite_sprite
+from version import load_object_versions
 
-spinner = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
+SPINNER = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
+REPO = 'OneLifeData7'
 
 
 def data_path(data_type, oid=None, ext='txt'):
     if oid:
-        return os.path.join('OneLifeData7', data_type, '{}.{}'.format(str(oid), ext))
+        return os.path.join(REPO, data_type, '{}.{}'.format(str(oid), ext))
     else:
-        return os.path.join('OneLifeData7', data_type)
+        return os.path.join(REPO, data_type)
 
 
 def parse_bool(s):
@@ -47,7 +49,7 @@ OBJECT_PROPS = {
     'numUses': int,
     'numSlots': int,
     'permanent': parse_bool,
-    'person': parse_bool,
+    'person': int,
     'pixHeight': int,
     'rValue': float,
     'spriteID': int
@@ -75,41 +77,52 @@ TRANSITION_PROPS = [
 
 
 def update(out):
+    sys.stderr.write("Loading transitions ⠏")
+
+    # Transitions
+    transitions = []
+    transitions_path = data_path('transitions')
+    for fn in os.listdir(transitions_path):
+        sys.stderr.write('\b' + SPINNER.next())
+        if re.match("-?[\d]*_-?[\d]*[_A-Z]*.txt", fn):
+            transitions.append(load_transition(
+                os.path.join(transitions_path, fn)))
+
+    # Any object mentioned in a transition is a 'natural object', and we'll
+    # keep it.
+    natural_objects = set().union(t[field] for t in transitions
+                                  for field in ('target', 'actor',
+                                                'newActor', 'newTarget'))
+
+    sys.stderr.write("\b\b\nLoading version info\n")
+
+    # Collect the version that each object was added.
+    object_versions = load_object_versions(REPO)
+
     sys.stderr.write("Parsing object files ⠏")
 
     # Objects
     objects = {}
     objects_path = data_path('objects')
     for fn in os.listdir(objects_path):
-        sys.stderr.write('\b' + spinner.next())
+        sys.stderr.write('\b' + SPINNER.next())
 
-        if fn != 'nextObjectNumber.txt':
+        if fn != 'nextObjectNumber.txt' and int(fn[:-4]) in natural_objects:
             oid, obj = load_object(os.path.join(objects_path, fn))
+            obj['version'] = object_versions[oid]
             objects[oid] = obj
-
-    sys.stderr.write("\b\b\nLoading transitions ⠏")
-
-    # Transitions
-    transitions = []
-    transitions_path = data_path('transitions')
-    for fn in os.listdir(transitions_path):
-        sys.stderr.write('\b' + spinner.next())
-        if re.match("-?[\d]*_-?[\d]*[_A-Z]*.txt", fn):
-            transitions.append(load_transition(
-                os.path.join(transitions_path, fn)))
 
     sys.stderr.write("\b\b\nGenerating sprites ⠏")
 
     # Sprites
     for obj in objects.itervalues():
-        sys.stderr.write('\b' + spinner.next())
+        sys.stderr.write('\b' + SPINNER.next())
 
         # Create a composite sprite.
-        if not obj['person']:
-            out_fn = os.path.join('sprites', '{}.png'.format(obj['id']))
-            create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
-            obj['sprite'] = out_fn
-            del obj['sprites']
+        out_fn = os.path.join('sprites', '{}.png'.format(obj['id']))
+        create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
+        obj['sprite'] = out_fn
+        del obj['sprites']
 
     json.dump({'objects': objects, 'transitions': transitions}, out)
     sys.stderr.write("\b\b\nDone!\n")
