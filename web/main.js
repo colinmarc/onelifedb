@@ -21,7 +21,16 @@ window.onload = function() {
     floater.style.top = e.clientY + 5;
   });
 
-  function showPage(id) {
+  function showPage(oid) {
+    if (currentpage == oid)
+      return;
+
+    let id = 'searchpage';
+    if (oid !== null) {
+      id = 'viewpage'
+      renderViewPage(objects[oid]);
+    }
+
     header.classList.add('retracted');
     document.querySelectorAll('.page').forEach(page => {
       if (page.id == id) {
@@ -33,25 +42,17 @@ window.onload = function() {
   }
 
   function navigate(oid) {
-    if (currentpage == oid)
-      return;
-
     let page = window.location.pathname;
-
-    if (oid === null) {
-      showPage('searchpage');
-    } else {
+    if (oid !== null) {
       page = '#' + oid.toString();
-      renderViewPage(objects[oid]);
-      showPage('viewpage');
     }
 
+    showPage(oid);
     history.pushState(oid, document.title, page);
-    currentpage = oid;
   }
 
   window.onpopstate = (e) => {
-    console.log(e);
+    showPage(e.state);
   };
 
   function renderThumbnail(obj, size, clickable) {
@@ -118,9 +119,7 @@ window.onload = function() {
       if (window.location.hash) {
         const oid = parseInt(window.location.hash.substring(1));
         if (oid !== NaN && objects[oid]) {
-          currentpage = oid;
-          renderViewPage(objects[oid])
-          showPage('viewpage');
+          showPage(oid);
         }
       }
 
