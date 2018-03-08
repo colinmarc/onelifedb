@@ -1,0 +1,94 @@
+<html>
+    <head>
+        <!-- <script type="text/javascript" src="mustache.min.js"></script> -->
+        <script type="text/javascript" src="main.js"></script>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            }
+
+            .thumbnail {
+                width: 128px;
+                height: 128px;
+                margin: 10px;
+                background-size: contain;
+                border: 1px solid black;
+                border-radius: 3px;
+                box-shadow: 2px -3px 5px rgba(1, 1, 1, .4);
+            }
+
+            .thumbnail.clickable:hover {
+                cursor: pointer;
+            }
+
+            #floater {
+                display: none;
+                position: absolute;
+                overflow: hidden;
+                background: white;
+                padding: .5em;
+                font-size: .8em;
+                border: 1px solid gray;
+                box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            #header {
+                text-align: center;
+                margin-top: 30%;
+                margin-bottom: 1em;
+                font-size: 1.2em;
+            }
+
+            #header.retracted {
+                margin-top: inherit !important;
+            }
+
+            #header>h1 {
+                font-size: 2em;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            #searchbar {
+                text-align: center;
+                font-size: 1.4em;
+                width: 80%;
+                margin: 0 1em;
+            }
+
+            #searchoptions {
+                margin-top: 2px;
+                font-style: italic;
+                font-size: .6em;
+            }
+
+            #searchobjects {
+                display: flex;
+                flex-flow: row wrap;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="floater">
+            </div>
+            <div id="header">
+                <h1>One Hour One Life Reference Tool</h1>
+                <input id="searchbar" type="text" autofocus="true" placeholder="search for objects" />
+                <div id="searchoptions">
+                    <input id="showunreleased" type="checkbox" />show unreleased objects
+                </div>
+            </div>
+            <div id="searchpage" class="page" style="display: none">
+                <div id="loading">Loading...</div>
+                <div id="searchobjects">
+                </div>
+            </div>
+            <div id="viewpage" class="page" style="display: none">
+                <div id="viewthumb"></div>
+                <h2><span id="viewoid"></span>: <span id="viewname"></span></h2>
+                <div id="viewproperties"></div>
+            </div>
+        </div>
+    </body>
+</html>
