@@ -1,9 +1,3 @@
-var thumbnailTemplate = `
-<div class="thumbnail">
-  <a href="{{id}}"><img src="{{sprite}}" title="{{name}}"/></a>
-</div>
-`
-
 window.onload = function() {
   let objects, transitions, currentpage = -1;
   const floater = document.getElementById('floater'),
