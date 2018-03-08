@@ -21,6 +21,10 @@ DIST=${1:-dist}
 mkdir -p "$TMP/sprites"
 pipenv run python gen.py "$TMP"
 
+echo "Building web interface..."
+cp web/*.png "$TMP"
+minify -o "$TMP" web
+
 echo "Moving $TMP to $DIST..."
 chmod 755 "$TMP"
 rm -rf "$DIST"
