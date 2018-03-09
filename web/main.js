@@ -58,7 +58,7 @@ window.onload = function() {
     thumb.classList.add('thumbnail');
 
     let name;
-    if (obj !== null) {
+    if (obj) {
       thumb.dataset.oid = obj.id;
       thumb.style.backgroundImage = `url("${obj.sprite}"), url("grass.png")`;
       name = obj.name;
@@ -131,19 +131,14 @@ window.onload = function() {
         renderThumbnail(objects[t.target], 64, true));
     }
 
-    if (t.newTarget > 0) {
-      newTarget.appendChild(
-        renderThumbnail(objects[t.newTarget], 64, true));
-    }
+    newTarget.appendChild(
+      renderThumbnail(objects[t.newTarget], 64, true));
 
     if (t.timed) {
       if (t.time === -1)
         actor.innerHTML = 'epoch';
       else
         actor.innerHTML = t.time + 's';
-
-      if (t.newTarget == 0)
-        newTarget.appendChild(renderThumbnail(null, 64, true));
     } else {
       if (t.actor < 1) {
         let hand = document.createElement('div');
@@ -156,10 +151,8 @@ window.onload = function() {
 
       // This happens when the actor joins the target. For example, sheep eating
       // carrots.
-      if (t.newActor > 0) {
-        newActor.appendChild(
-          renderThumbnail(objects[t.newActor], 64, true));
-      }
+      newActor.appendChild(
+        renderThumbnail(objects[t.newActor], 64, true));
     }
 
     return formula;
