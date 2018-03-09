@@ -115,7 +115,7 @@ def generate_json(dist_path):
     # Sprites
     for obj in objects.itervalues():
         out_fn = os.path.join(dist_path, 'sprites', '{}.png'.format(obj['id']))
-        # create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
+        create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
 
         # This is actually a url, not a path.
         obj['sprite'] = 'sprites/{}.png'.format(obj['id'])
