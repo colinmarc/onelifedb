@@ -251,6 +251,19 @@ window.onload = function() {
             !t.lastActor
           ), 1);
         }
+
+        // // Put target before newTarget and actor before newActor.
+        // obj.actorTransitions.sort((a, b) =>
+        //   (a.actor === obj.actor ? 1 : 0) - (b.actor === obj.actor ? 1 : 0)
+        // );
+        //
+        // obj.targetTransitions.sort((a, b) =>
+        //   (a.target === obj.target ? 1 : 0) - (b.target === obj.target ? 1 : 0)
+        // );
+        //
+        // obj.timedTransitions.sort((a, b) =>
+        //   (a.target !== obj.target ? 1 : 0) - (b.target !== obj.target ? 1 : 0)
+        // );
       })
 
       // We got linked directly to an object.
