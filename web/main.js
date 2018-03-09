@@ -55,19 +55,30 @@ window.onload = function() {
 
   function renderThumbnail(obj, size, clickable) {
     let thumb = document.createElement('div')
-    thumb.dataset.oid = obj.id;
     thumb.classList.add('thumbnail');
-    thumb.style.cssText = `background-image: url("${obj.sprite}"), url("grass.png");`;
-    thumb.style.width = size;
-    thumb.style.height = size;
 
-    if (clickable) {
-      thumb.classList.add('clickable');
-      thumb.addEventListener('mouseover', () => tooltip(obj.name));
-      thumb.addEventListener('mouseout', hideTooltip);
-      thumb.addEventListener('click', () => navigate(obj.id));
+    let name;
+    if (obj !== null) {
+      thumb.dataset.oid = obj.id;
+      thumb.style.backgroundImage = `url("${obj.sprite}"), url("grass.png")`;
+      name = obj.name;
+
+      if (clickable) {
+        thumb.classList.add('clickable');
+        thumb.addEventListener('click', () => navigate(obj.id));
+      }
+    } else {
+      thumb.style.backgroundImage = 'url("grass.png")';
+      name = 'empty';
     }
 
+    if (clickable) {
+      thumb.addEventListener('mouseover', () => tooltip(name));
+      thumb.addEventListener('mouseout', hideTooltip);
+    }
+
+    thumb.style.width = size;
+    thumb.style.height = size;
     return thumb;
   }
 
@@ -115,6 +126,9 @@ window.onload = function() {
         actor.innerHTML = 'epoch';
       else
         actor.innerHTML = t.time + 's';
+
+      if (t.newTarget == 0)
+        newTarget.appendChild(renderThumbnail(null, 64, true));
     } else {
       if (t.actor < 1) {
         let hand = document.createElement('div');
