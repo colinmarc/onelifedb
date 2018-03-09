@@ -72,6 +72,39 @@
                 align-items: center;
             }
 
+            #viewpage>h2 {
+                margin-top: -.3em;
+                margin-bottom: .5em;
+            }
+
+            #viewpage>h3 {
+                margin-bottom: -.3em;
+            }
+
+            #viewproperties {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #viewpropertiesleft {
+                width: 200px;
+                display: flex;
+                flex-direction: column;
+                text-align: right;
+                color: rgba(0, 0, 0, .6);
+                font-style: italic;
+                padding-right: .5em;
+            }
+
+            #viewpropertiesright {
+                width: 200px;
+                display: flex;
+                flex-direction: column;
+                text-align: left;
+                font-weight: bold;
+            }
+
             .transition {
                 margin: 10px 0;
                 padding: 10px;
@@ -117,7 +150,10 @@
             <div id="viewpage" class="page" style="display: none">
                 <div id="viewthumb"></div>
                 <h2>#<span id="viewoid"></span> <span id="viewname"></span></h2>
-                <div id="viewproperties"></div>
+                <div id="viewproperties">
+                    <div id="viewpropertiesleft"></div>
+                    <div id="viewpropertiesright"></div>
+                </div>
                 <h3 id="interactionsheader">Interactions</h3>
                 <div id="viewactortransitions"></div>
                 <div id="viewtargettransitions"></div>

@@ -88,10 +88,25 @@ window.onload = function() {
     viewthumb = document.getElementById('viewthumb'),
     viewoid = document.getElementById('viewoid'),
     viewname = document.getElementById('viewname'),
-    viewproperties = document.getElementById('viewproperties'),
+    viewpropertiesleft = document.getElementById('viewpropertiesleft'),
+    viewpropertiesright = document.getElementById('viewpropertiesright'),
     viewactortransitions = document.getElementById('viewactortransitions'),
     viewtargettransitions = document.getElementById('viewtargettransitions'),
     viewtimedtransitions = document.getElementById('viewtimedtransitions');
+
+  const viewProps = new Map([
+    ['foodValue', 'food value'],
+    ['heatValue', 'heat value'],
+    ['rValue', 'insulation value'],
+    ['numUses', 'number of uses'],
+  ])
+
+  function pluralize(s, count) {
+    if (count > 1)
+      return `${count} ${s}s`;
+    else
+      return `${count} ${s}`
+  }
 
   function renderTransition(t) {
     let formula = document.createElement('div');
@@ -160,8 +175,10 @@ window.onload = function() {
     viewtargettransitions.innerHTML = "";
     viewtimedtransitions.innerHTML = "";
 
-    if (obj.actorTransitions.length > 0 || obj.targetTransitions.length > 0) {
+    const interactionCount = obj.actorTransitions.length + obj.targetTransitions.length;
+    if (interactionCount > 0) {
       interactionsheader.style.display = '';
+      interactionsheader.innerHTML = pluralize('Interaction', interactionCount);
       obj.actorTransitions.forEach((t) =>
         viewactortransitions.appendChild(renderTransition(t)));
       obj.targetTransitions.forEach((t) =>
@@ -172,11 +189,31 @@ window.onload = function() {
 
     if (obj.timedTransitions.length > 0) {
       transitionsheader.style.display = '';
+      transitionsheader.innerHTML = pluralize('Timed Transition', obj.timedTransitions.length);
       obj.timedTransitions.forEach((t) =>
         viewtimedtransitions.appendChild(renderTransition(t)));
     } else {
       transitionsheader.style.display = 'none';
     }
+
+    viewpropertiesleft.innerHTML = '';
+    viewpropertiesright.innerHTML = '';
+    viewProps.forEach((displayName, name) => {
+      const value = obj[name];
+      if (value && value > 0) {
+        const left = document.createElement('div'),
+          right = document.createElement('div');
+
+        left.innerHTML = displayName + ': ';
+        left.classList.add('propleft');
+
+        right.innerHTML = value;
+        right.classList.add('propright');
+
+        viewpropertiesleft.appendChild(left);
+        viewpropertiesright.appendChild(right);
+      }
+    });
   }
 
   const searchobjects = document.getElementById('searchobjects'),
