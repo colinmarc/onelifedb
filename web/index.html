@@ -8,8 +8,6 @@
             }
 
             .thumbnail {
-                width: 128px;
-                height: 128px;
                 margin: 10px;
                 background-size: contain;
                 border: 1px solid black;
@@ -66,6 +64,26 @@
                 flex-flow: row wrap;
                 justify-content: center;
             }
+
+            .transition {
+                margin-top: 10px;
+            }
+
+            .transition .thumbnail,
+            .transition .handthumbnail {
+                vertical-align: middle;
+                display: inline-block;
+                margin: 5px;
+            }
+
+            .handthumbnail {
+                background-image: url("hand.png");
+                background-position: center;
+                background-size: 40px;
+                background-repeat: no-repeat;
+                width: 64px;
+                height: 64px;
+            }
         </style>
     </head>
     <body>
@@ -76,7 +94,8 @@
                 <h1>One Hour One Life Reference Tool</h1>
                 <input id="searchbar" type="text" autofocus="true" autocomplete="off" placeholder="search for objects" />
                 <div id="searchoptions">
-                    <input id="showunreleased" type="checkbox" />show unreleased objects
+                    <input id="showcategories" type="checkbox" />show categories
+                    <input id="showunreleased" type="checkbox" />show unreleased content
                 </div>
             </div>
             <div id="searchpage" class="page" style="display: none">
@@ -86,8 +105,13 @@
             </div>
             <div id="viewpage" class="page" style="display: none">
                 <div id="viewthumb"></div>
-                <h2><span id="viewoid"></span>: <span id="viewname"></span></h2>
+                <h2>#<span id="viewoid"></span> <span id="viewname"></span></h2>
                 <div id="viewproperties"></div>
+                <h3 id="interactionsheader">Interactions</h3>
+                <div id="viewactortransitions"></div>
+                <div id="viewtargettransitions"></div>
+                <h3 id="transitionsheader">Timed Transitions</h3>
+                <div id="viewtimedtransitions"></div>
             </div>
         </div>
     </body>

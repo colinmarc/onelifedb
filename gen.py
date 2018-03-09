@@ -11,6 +11,8 @@ from composite import create_composite_sprite
 from version import load_object_versions
 
 REPO = 'OneLifeData7'
+OBJECT_FILENAME_RE = re.compile(r"\d+\.txt")
+TRANSITION_FILENAME_RE = re.compile(r"-?\d+_-?\d+(_[A-Z]+)?\.txt")
 
 
 def data_path(data_type, oid=None, ext='txt'):
@@ -65,7 +67,7 @@ SPRITE_PROPS = {
 TRANSITION_PROPS = [
     ('newActor', int),
     ('newTarget', int),
-    ('autoDecaySecs', int),
+    ('time', int),
     ('actorMinUseFraction', float),
     ('targetMinUseFraction', float),
     ('reverseUseActor', int),
@@ -87,7 +89,7 @@ def generate_json(dist_path):
     transitions = []
     transitions_path = data_path('transitions')
     for fn in os.listdir(transitions_path):
-        if re.match("-?[\d]*_-?[\d]*[_A-Z]*.txt", fn):
+        if re.match(TRANSITION_FILENAME_RE, fn):
             transitions.append(load_transition(
                 os.path.join(transitions_path, fn)))
 
@@ -103,7 +105,7 @@ def generate_json(dist_path):
     objects = {}
     objects_path = data_path('objects')
     for fn in os.listdir(objects_path):
-        if fn != 'nextObjectNumber.txt' and int(fn[:-4]) in natural_objects:
+        if re.match(OBJECT_FILENAME_RE, fn) and int(fn[:-4]) in natural_objects:
             oid, obj = load_object(os.path.join(objects_path, fn))
             obj['version'] = object_versions[oid]
             objects[oid] = obj
@@ -113,7 +115,7 @@ def generate_json(dist_path):
     # Sprites
     for obj in objects.itervalues():
         out_fn = os.path.join(dist_path, 'sprites', '{}.png'.format(obj['id']))
-        create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
+        # create_composite_sprite(obj['sprites'], out_fn, obj['pixHeight'])
 
         # This is actually a url, not a path.
         obj['sprite'] = 'sprites/{}.png'.format(obj['id'])
@@ -199,6 +201,17 @@ def load_transition(fn):
     fn_data = os.path.basename(fn)[:-4].split("_")
     transition['actor'] = int(fn_data[0])
     transition['target'] = int(fn_data[1])
+    if len(fn_data) > 2:
+        if fn_data[2] == 'LA':
+            transition['lastActor'] = True
+        elif fn_data[2] == 'LT':
+            transition['lastTarget'] = True
+
+    if transition['actor'] == -1:
+        transition['timed'] = True
+    else:
+        transition['timed'] = False
+        del transition['time']
 
     return transition
 
