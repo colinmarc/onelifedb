@@ -223,12 +223,15 @@ window.onload = function() {
       Object.values(json.transitions).forEach(t => {
         if (t.timed) {
           if (t.target > 0) objects[t.target].timedTransitions.push(t);
-          if (t.newTarget > 0) objects[t.newTarget].timedTransitions.push(t);
+          if (t.newTarget > 0 && t.newTarget !== t.target)
+            objects[t.newTarget].timedTransitions.push(t);
         } else {
           if (t.actor > 0) objects[t.actor].actorTransitions.push(t);
           if (t.target > 0) objects[t.target].targetTransitions.push(t);
-          if (t.newActor > 0) objects[t.newActor].actorTransitions.push(t);
-          if (t.newTarget > 0) objects[t.newTarget].targetTransitions.push(t);
+          if (t.newActor > 0 && t.newActor !== t.actor)
+            objects[t.newActor].actorTransitions.push(t);
+          if (t.newTarget > 0 && t.newTarget !== t.target)
+            objects[t.newTarget].targetTransitions.push(t);
         }
       });
 

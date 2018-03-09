@@ -204,7 +204,7 @@ def load_transition(fn):
     if len(fn_data) > 2:
         if fn_data[2] == 'LA':
             transition['lastActor'] = True
-        elif fn_data[2] == 'LT':
+        elif fn_data[2] == 'LT' or fn_data[2] == 'L':
             transition['lastTarget'] = True
 
     if transition['actor'] == -1:
