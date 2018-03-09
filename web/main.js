@@ -170,6 +170,8 @@ window.onload = function() {
     showcategories = document.getElementById('showcategories'),
     showunreleased = document.getElementById('showunreleased');
 
+  let filterTimer;
+
   function refilterObjects() {
     const search = searchbar.value.toLowerCase(),
       includeUnreleased = showunreleased.checked,
@@ -191,7 +193,8 @@ window.onload = function() {
   searchbar.addEventListener('input', () => {
     header.classList.add('retracted');
 
-    refilterObjects()
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(refilterObjects, 100);
     navigate(null);
   });
 
